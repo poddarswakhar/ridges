@@ -552,6 +552,29 @@ def status():
         else:
             console.print(f"❌ {display_name}: [bold red]Stopped[/bold red]")
 
+@cli.group()
+def benchmark():
+    """Run benchmark evaluations"""
+    pass
+
+@benchmark.command()
+def patches():
+    """Generate patches for benchmark problems"""
+    console.print(Panel(f"[bold cyan]Generating Benchmark Patches[/bold cyan]",
+                        title="Benchmark Patches", border_style="cyan"))
+    
+    # Implementation placeholder - will generate patches for benchmark evaluation
+    console.print("🚧 Patch generation functionality coming soon!", style="yellow")
+
+@benchmark.command()
+def evaluate():
+    """Evaluate generated patches against benchmark"""
+    console.print(Panel(f"[bold cyan]Evaluating Benchmark Patches[/bold cyan]",
+                        title="Benchmark Evaluation", border_style="cyan"))
+    
+    # Implementation placeholder - will evaluate patches against test suite
+    console.print("🚧 Patch evaluation functionality coming soon!", style="yellow")
+
 @cli.command()
 @click.option("--agent-file", default="miner/agent.py", help="Path to agent file to test")
 @click.option("--num-problems", default=3, type=int, help="Number of problems to test")
