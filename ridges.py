@@ -11,7 +11,8 @@ import httpx
 import os
 import subprocess
 import requests
-from typing import Optional
+from typing import Optional, Tuple
+from itertools import batched
 from dotenv import load_dotenv
 from rich.console import Console
 from rich.panel import Panel
@@ -562,9 +563,41 @@ def patches():
     """Generate patches for benchmark problems"""
     console.print(Panel(f"[bold cyan]Generating Benchmark Patches[/bold cyan]",
                         title="Benchmark Patches", border_style="cyan"))
+
+    def get_top_agent_code() -> str:
+        pass
+
+    def replace_model(code: str) -> str:
+        pass
+
+    def get_instance_ids() -> list[str]:
+        return ["pallets__flask-5014"] # Replace with getting from swe_bench verified
+
+    def generate_patch(agent_code: str, instance_id: str) -> Tuple[str, str]:
+        """Start docker container and return patch, logs"""
+        pass
+
+    def store_patch(instance_id: str, patch: str, logs: str, generation_stats: dict):
+        """Store in directory"""
+        pass
+
+    top_agent_code = get_top_agent_code()
+    agent_code = replace_model(top_agent_code)
+
+    instance_ids = get_instance_ids()
+
+    # Batch generate patches
+    BATCH_SIZE = 10
+    for batch in batched(instance_ids, BATCH_SIZE):
+        for instance_id in batch:
+            console.print(f"Generating patch for {instance_id}...", style="yellow")
+            generation_stats = { "start_time": time.time() }
+            patch, logs = generate_patch(agent_code, instance_id)
+            generation_stats["end_time"] = time.time()
+            store_patch(instance_id, patch, logs, generation_stats)
     
-    # Implementation placeholder - will generate patches for benchmark evaluation
-    console.print("🚧 Patch generation functionality coming soon!", style="yellow")
+    console.print(Panel(f"[bold green]Patches generated![/bold green]",
+                        title="Benchmark Patches", border_style="green"))
 
 @benchmark.command()
 def evaluate():
