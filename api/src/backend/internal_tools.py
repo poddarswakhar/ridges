@@ -54,6 +54,7 @@ class InternalTools:
             max_inactive_connection_lifetime=300,
             statement_cache_size=512,
             command_timeout=30,
+            ssl='require',  # Force SSL/TLS for RDS compatibility
             server_settings={
                 "idle_in_transaction_session_timeout": "300000",
                 "statement_timeout": "30000",

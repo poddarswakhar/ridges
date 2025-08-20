@@ -31,6 +31,7 @@ class DBManager:
             max_inactive_connection_lifetime=300,
             statement_cache_size=1_000,
             command_timeout=30,
+            ssl='require',  # Force SSL/TLS for RDS compatibility
             server_settings={
                 'idle_in_transaction_session_timeout': '300000',  # 5 minutes
                 'statement_timeout': '30000',  # 30 seconds

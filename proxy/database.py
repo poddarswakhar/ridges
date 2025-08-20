@@ -32,6 +32,7 @@ class DBManager:
             max_size=self.max_con,
             max_inactive_connection_lifetime=300,
             statement_cache_size=1_000,
+            ssl='prefer',  # Use SSL if available, fallback to unencrypted
         )
         logger.info(f"Database connection pool initialized with {self.min_con}-{self.max_con} connections")
 
