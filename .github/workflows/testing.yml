@@ -134,6 +134,12 @@ jobs:
         export API_BASE_URL="http://localhost:8000"
         uv run python -m pytest test_real_api.py -v -W ignore::PendingDeprecationWarning
     
+    - name: Run approval system integration tests
+      run: |
+        cd tests
+        export API_BASE_URL="http://localhost:8000"
+        uv run python -m pytest test_approval_integration.py -v -W ignore::PendingDeprecationWarning
+    
     - name: Run comprehensive tests
       run: |
         cd tests
@@ -144,6 +150,7 @@ jobs:
           test_weights_setting.py \
           test_miner_agent_flow.py \
           test_real_api.py \
+          test_approval_integration.py \
           -v \
           --tb=short \
           --disable-warnings \

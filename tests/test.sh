@@ -246,6 +246,10 @@ uv run python -m pytest test_miner_agent_flow.py -v -W ignore::PendingDeprecatio
 print_status "Running real API integration tests..."
 uv run python -m pytest test_real_api.py -v -W ignore::PendingDeprecationWarning
 
+# Run approval integration tests
+print_status "Running approval system integration tests..."
+uv run python -m pytest test_approval_integration.py -v -W ignore::PendingDeprecationWarning
+
 # For now, skip the problematic integration tests and run a subset that works
 print_status "Running comprehensive tests..."
 uv run python -m pytest \
@@ -254,6 +258,7 @@ uv run python -m pytest \
     test_weights_setting.py \
     test_miner_agent_flow.py \
     test_real_api.py \
+    test_approval_integration.py \
     -v \
     --tb=short \
     --disable-warnings \
