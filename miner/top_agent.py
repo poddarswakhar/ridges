@@ -7918,7 +7918,7 @@ def execute_fix_workflow_v1(problem_statement: str, *, timeout: int, run_id_1: s
         timeout=timeout,
         run_id_1=run_id_1,
         instance_id=instance_id,
-        models=[GLM_MODEL_NAME],
+        models=AGENT_MODELS,
         start_over_time=timeout,
         # upgrade_model_time=700,
         tool_manager=tool_manager,
@@ -7950,26 +7950,57 @@ def execute_fix_workflow_v1(problem_statement: str, *, timeout: int, run_id_1: s
 #     return '|'.join(all_keywords[:10])  # Use up to 10 most relevant keywords
 
 def extract_keywords(problem_text: str) -> str:
-    """Extract keywords, prioritizing tokens that start with non-ASCII characters."""
+    """Extract high-signal search terms from the problem statement.
+
+    Heuristics:
+    - Keep quoted substrings verbatim (often exact messages/values)
+    - Keep dotted module/attr paths (e.g., pkg.mod.func)
+    - Keep non-ASCII tokens and special characters
+    - Keep numbers and hex fragments (e.g., 404, 0xFF)
+    - Keep error class names / capitalized identifiers (e.g., AssertionError)
+    - Drop common English stopwords to reduce noise
+    """
+    # Quoted exact fragments
     quoted = re.findall(r'"[^"\n]*"|\'[^\'\n]*\'', problem_text)
-    module_paths = re.findall(r'\b(?:\w+\.){2,}\w+\b', problem_text)
+    # Dotted module paths
+    module_paths = re.findall(r'\b(?:[A-Za-z_][\w]*\.){1,}[A-Za-z_][\w]*\b', problem_text)
+    # Alphanumeric tokens (unicode)
     raw_tokens = re.findall(r'\b\w+\b', problem_text, flags=re.UNICODE)
-    special_chars = [char for char in problem_text if not char.isspace() and ord(char) > 127]
+    # Non-ASCII single chars (operators, unicode glyphs)
+    special_chars = [c for c in problem_text if not c.isspace() and ord(c) > 127]
+    # Numbers and hex-like
+    numerics = re.findall(r'\b(?:0x[0-9A-Fa-f]+|\d{2,})\b', problem_text)
+    # Error/exception-like tokens (keep capitalization)
+    camel_caps = re.findall(r'\b[A-Z][A-Za-z]+(?:Error|Exception|Warning)\b', problem_text)
+
+    stopwords = {
+        'the','and','for','with','that','this','from','into','your','have','has','had','were','was','are','but','not',
+        'all','any','can','could','should','would','will','shall','may','might','must','than','then','else','when','while',
+        'on','in','at','by','of','to','as','it','its','is','be','or','if','an','a','we','you','they','he','she','i',
+    }
 
     def starts_with_non_ascii(token: str) -> bool:
         return len(token) > 0 and ord(token[0]) > 127
 
     non_ascii_tokens = [t for t in raw_tokens if starts_with_non_ascii(t)]
-    seen = set()
 
+    # Keep lowercase technical-ish tokens longer than 2 that are not stopwords
+    lower_tokens = [t for t in (tok.lower() for tok in raw_tokens)
+                    if len(t) > 2 and t not in stopwords]
+
+    # Deduplicate in insertion order
+    seen = set()
     def dedup(seq):
         for item in seq:
-            if item not in seen:
+            if item and item not in seen:
                 seen.add(item)
                 yield item
 
-    all_keywords = list(dedup(quoted + module_paths + non_ascii_tokens + special_chars))
-    return '|'.join(all_keywords[:10])
+    all_keywords = list(dedup(
+        quoted + module_paths + camel_caps + numerics + non_ascii_tokens + special_chars + lower_tokens
+    ))
+
+    return '|'.join(all_keywords[:12])
 
 
 def multi_task_process(input_dict: Dict[str, Any], repod_dir: str = 'repo'):
