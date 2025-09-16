@@ -98,7 +98,6 @@ You are a code analysis expert tasked with identifying test functions that direc
    - The search_term/keyword must be come from the issues or bad result/behavior, not from the expected result/behavior in the problem statement.
    - If the problem statement contains code snippet or error output, the search term from the code snippet or error output should be prioritized.
    - Use `analyze_dependencies` to understand test relationships.
-   - PRIORITIZE signals from failures first: stack traces, assertion messages, exact error text, file paths, and function names before doing broad searches.
 
 3. **Filtering & Ranking** 
    - If you've found file that contains relevant test functioon, must call `filter_test_func_names` directly to filter valid functions. If filtered result is empty, that means your search is not relevant to the problem statement.
@@ -125,7 +124,6 @@ You are a code analysis expert tasked with identifying test functions that direc
 - Never guess parameter names; refer to the tool's input schema
 - If a tool is not available, explicitly state it and proceed to the next step
 - Regular expressions can be used as a useful tool when processing and analyzing strings.
- - If the same tool is called with the same args twice, CHANGE STRATEGY: try different search terms (prefer quoted strings, dotted symbols, exception names, numerics), a different directory/file scope, or switch to dependency analysis.
 
 **⚡ Multi-Tool Execution Guidance**
 - You CAN and SHOULD call multiple tools in a single step using arrays for `next_tool_name` and `next_tool_args`.
@@ -184,8 +182,6 @@ Your task: Make the necessary and meaningful code changes to resolve the issue a
 - If tests fail, analyze the failure and propose fixes carefully
 - Prefer adding, instead of updating or deleting the existing code.
 - Never guess a function's behavior with name — always read its body and verify the actual implementation.
- - Before editing, produce a short ROOT CAUSE HYPOTHESIS: failing message, implicated function/lines, and your minimal intended change.
- - Prefer the SMALLEST SAFE EDIT to satisfy the provided tests.
 
 ---
 
@@ -208,7 +204,6 @@ Your task: Make the necessary and meaningful code changes to resolve the issue a
 1. Identify all relevant code files, and even if validation passes, fix every potential issue in the codebase.
 2. Always review the current changes and `start_over` if current approach is not ideal.
 3. Never assume dependencies are installed; always include required imports and installation steps.
- 4. Confirm the patch is minimal and does not introduce regressions in the provided tests.
 
 ---
 
@@ -237,20 +232,18 @@ Your task: Fix all the failures from `run_repo_tests` test.
 ## 🔹 Key Rules
 - You must fix all the failures from `run_repo_tests` test.
 - Never edit or create test files, new files, or directories.
- - Always form a brief ROOT CAUSE HYPOTHESIS before editing: the failing assertion/message, the suspected function and lines, and the intended minimal change.
- - Prefer the SMALLEST SAFE EDIT that corrects the failing behavior; avoid refactors unless strictly necessary.
 
 ## 🔹 Workflow
-1. Run `run_repo_tests`.
-2. Parse failures: extract file paths, functions, stack frames, exact assertion text, and error types.
-3. Localize: search using those signals first (`search_in_all_files_content_v2`, `search_in_specified_file_v2`), read code (`get_file_content`), and map dependencies.
-4. Propose 2+ alternative minimal fixes with different strategies/locations/risk; pick the lowest-risk that aligns with the hypothesis.
-5. Apply the chosen minimal edit using `apply_code_edit_and_run_repo_tests` (preferred) or `apply_code_edit` + `run_repo_tests`.
-6. Re-run ONLY the failing tests first if supported; run the full set only after failures are cleared.
-7. Repeat until all failures are fixed and no new failures are introduced; then call `pytest_fix_finish`.
+1. Use `run_repo_tests` to run the test.
+2. Analyze the failure and propose fixes carefully. You can use relevant tools to read and understand the code like `search_in_all_files_content_v2`, `get_file_content`, `search_in_specified_file_v2`, `search_recurive_in_all_files_in_directory`, and `analyze_dependencies`.
+3. Use `apply_code_edit_and_run_repo_tests` to fix the code and run the test immediately.
+4. Use `apply_code_edit` to fix the code, but not run the test immediately.
+5. Use `run_repo_tests` to run the test again.
+6. Repeat the process until all the failures are fixed. You will see "Successfully ran all tests." from `apply_code_edit_and_run_repo_tests` or `run_repo_tests`.
+7. Use `pytest_fix_finish` to finish the task.
 
 **✅ Validation** 
-- Use `run_repo_tests` to validate fixes. Confirm: failing tests pass, no new failures appear, and the patch is minimal and scoped.
+- Use `run_repo_tests` to test your fixes. You must fix all the failures.
 
 You have access to the following tools:
 {tools_docs}
@@ -442,17 +435,12 @@ Your previous response:
 {previous_response}
 
 Try to use something different!
-If you called the same tool and args twice:
-- Change search terms (prefer exact quoted strings, dotted symbols, exception names, numerics)
-- Narrow or widen scope (file vs directory)
-- Switch strategy (dependency analysis, different tool)
 """)
 
 STOP_INSTRUCTION = textwrap.dedent("""
 # 🎨 
 DO NOT generate `observation:` in your response. It will be provided by user for you.
 Generate only SINGLE triplet of `next_thought`, `next_tool_name`, `next_tool_args` in your response.
-Your `next_thought` MUST include: a brief root-cause hypothesis and why the next tool best reduces uncertainty.
 """)
 
 DEFAULT_PROXY_URL = os.getenv("AI_PROXY_URL", "http://sandbox_proxy")
