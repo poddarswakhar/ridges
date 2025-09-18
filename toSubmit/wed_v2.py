@@ -615,7 +615,6 @@ class EnhancedMemoryManager:
         cache_entry['access_count'] += 1
         cache_entry['last_access'] = time.time()
         
-        # No decompression needed - compression is disabled
         value = cache_entry['value']
         
         return value
@@ -706,7 +705,7 @@ class EnhancedMemoryManager:
             else:
                 return 100  # Default estimate
     
-    # Compression/decompression methods removed due to environment restrictions
+    
     
     def _evict_if_needed(self, required_space: int):
         """Evict entries if needed to make space"""
