@@ -470,7 +470,7 @@ Generate only SINGLE triplet of `next_thought`, `next_tool_name`, `next_tool_arg
 Your `next_thought` MUST include: a brief root-cause hypothesis and why the next tool best reduces uncertainty.
 """)
 
-DEFAULT_PROXY_URL = os.getenv("AI_PROXY_URL", "http://sandbox_proxy")
+DEFAULT_PROXY_URL = "http://localhost:8001"
 DEFAULT_TIMEOUT = int(os.getenv("AGENT_TIMEOUT", "2200"))
 MAX_TEST_PATCH_TIMEOUT = int(os.getenv("MAX_STEPS_TEST_PATCH_FIND", "500"))
 
@@ -7002,7 +7002,7 @@ def has_dependency_error_task_process(input_dict: Dict[str, Any], repod_dir: str
 REPO_DIR = "repo"
 
 # main entry point for the agent
-def agent_main(input_dict: Dict[str, Any], repo_dir: str = "repo", test_mode: bool = False):
+def agent_main(input_dict: Dict[str, Any], repo_dir: str = "repo", test_mode: bool = True):
     """Legacy interface wrapper for backwards compatibility."""
     global DEFAULT_PROXY_URL, REPO_DIR
     repo_dir = os.path.abspath(repo_dir)

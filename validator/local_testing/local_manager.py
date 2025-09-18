@@ -498,9 +498,10 @@ class LocalSandbox:
                 remove=False,
                 mem_limit=f"{SANDBOX_MAX_RAM_USAGE}m",
                 environment={
-                    'AI_PROXY_URL': self.local_manager.proxy_url,
+                    'AI_PROXY_URL': os.getenv('AI_PROXY_URL', self.local_manager.proxy_url),
                     'RIDGES_PROXY_URL': self.local_manager.proxy_url,
                     'RIDGES_API_URL': os.getenv('RIDGES_API_URL', 'http://localhost:8000'),
+                    'CHUTES_API_KEY': os.getenv('CHUTES_API_KEY', ''),
                 }
             )
             self._log("Started sandbox container")
