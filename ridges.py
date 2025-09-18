@@ -560,13 +560,56 @@ def status():
 @click.option("--verbose", is_flag=True, help="Show detailed output")
 @click.option("--cleanup", is_flag=True, default=True, help="Clean up containers after test")
 @click.option("--start-proxy", is_flag=True, default=True, help="Automatically start proxy if needed")
-def test_agent(agent_file: str, num_problems: int, timeout: int, problem_set: str, verbose: bool, cleanup: bool, start_proxy: bool):
+@click.option("--debug", is_flag=True, help="Enable debug mode with detailed logging in agent")
+@click.option("--local", is_flag=True, help="Run agent locally without Docker (faster debugging)")
+def test_agent(agent_file: str, num_problems: int, timeout: int, problem_set: str, verbose: bool, cleanup: bool, start_proxy: bool, debug: bool, local: bool):
     """Test your agent locally with full SWE-bench evaluation"""
     
     import tempfile
     import shutil
     import traceback
     from pathlib import Path
+    
+    # Set debug environment variable if debug flag is enabled
+    if debug:
+        import os
+        os.environ["RIDGES_DEBUG"] = "true"
+        console.print("🐛 Debug mode enabled - detailed logging will be shown in agent execution", style="yellow")
+    
+    # Handle local execution (no Docker)
+    if local:
+        console.print("🚀 Running agent locally without Docker (faster debugging)", style="bold green")
+        try:
+            from validator.local_testing.local_runner import run_local_evaluations
+            from validator.local_testing.local_agent_runner import LocalAgentRunner
+            
+            # Create local agent runner
+            runner = LocalAgentRunner(verbose=verbose)
+            
+            # Run evaluations locally
+            import asyncio
+            results = asyncio.run(run_local_evaluations(
+                agent_file=agent_file,
+                num_problems=num_problems,
+                timeout=timeout,
+                problem_set=problem_set,
+                runner=runner
+            ))
+            
+            # Display results
+            display_test_results(results)
+            
+            # Cleanup
+            if cleanup:
+                runner.cleanup()
+            
+            return
+        
+        except Exception as e:
+            console.print(f"💥 Local execution failed: {e}", style="bold red")
+            if verbose:
+                console.print(traceback.format_exc(), style="dim")
+            return
     
     # Check and setup .env file for proxy
     proxy_env_path = Path("proxy/.env")

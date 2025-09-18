@@ -23,6 +23,21 @@ import concurrent.futures
 import threading
 from collections import defaultdict
 
+# Debug mode - can be controlled via environment variable
+DEBUG_MODE = os.getenv("RIDGES_DEBUG", "false").lower() == "true"
+
+def debug_print(message: str, *args, **kwargs):
+    """Print debug message only if debug mode is enabled"""
+    if DEBUG_MODE:
+        print(f"🐛 DEBUG: {message}", *args, **kwargs)
+
+def debug_breakpoint(message: str = "Debug breakpoint reached"):
+    """Set an interactive breakpoint if debug mode is enabled"""
+    if DEBUG_MODE:
+        print(f"🐛 BREAKPOINT: {message}")
+        import pdb
+        pdb.set_trace()
+
 TEST_PATCH_FIND_SYSTEM_PROMPT_TEMPLATE_V0 = textwrap.dedent("""
 # 🧠 Test Function Discovery Expert
 
@@ -8016,9 +8031,22 @@ def extract_keywords(problem_text: str) -> str:
 
 
 def multi_task_process(input_dict: Dict[str, Any], repod_dir: str = 'repo'):
+    debug_print("=== STARTING AGENT EXECUTION ===")
+    debug_print(f"Input dict keys: {list(input_dict.keys())}")
+    debug_print(f"Repo dir: {repod_dir}")
+    debug_print(f"Current working directory: {os.getcwd()}")
+    
     problem_text = input_dict.get("problem_statement")
     hints = input_dict.get("Hints")
     instance_id = input_dict.get("instance_id")
+    
+    debug_print(f"Problem text length: {len(problem_text) if problem_text else 0}")
+    debug_print(f"Instance ID: {instance_id}")
+    debug_print(f"Hints: {hints[:100] if hints else 'None'}...")
+    
+    # Interactive breakpoint at the start
+    debug_breakpoint("Starting multi_task_process - inspect input data")
+    
     if not problem_text:
         raise ValueError("input_dict must contain 'problem_statement'.")
 
