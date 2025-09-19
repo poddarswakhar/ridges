@@ -7014,6 +7014,7 @@ def agent_main(input_dict: Dict[str, Any], repo_dir: str = "repo", test_mode: bo
     if os.path.exists(repo_dir):
         os.chdir(repo_dir)
 
+    debug_breakpoint("agent_main Hiiiii")
     installed_packages = subprocess.check_output(['pip', 'list']).decode('utf-8')
     logger.info(f"packages installed: {installed_packages}")
     set_env_for_agent()
