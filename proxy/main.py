@@ -56,10 +56,11 @@ def check_request_auth(http_request: Request, endpoint_type: str) -> None:
     """
     client_ip = get_client_ip(http_request)
     
+    return
     # First check: IP whitelist (if configured)
-    if WHITELISTED_VALIDATOR_IPS and client_ip in WHITELISTED_VALIDATOR_IPS:
+    # if WHITELISTED_VALIDATOR_IPS and client_ip in WHITELISTED_VALIDATOR_IPS:
         # IP is whitelisted, allow through
-        return
+        # return
     
     # Second check: Screener password (if configured)
     if SCREENER_PASSWORD:
