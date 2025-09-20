@@ -29,9 +29,9 @@ def check_websocket_ip_auth(websocket: WebSocket, event: str) -> bool:
         return True
     
     # Check IP whitelist
-    if client_ip not in WHITELISTED_VALIDATOR_IPS:
-        logger.warning(f"WebSocket {event} from non-whitelisted IP: {client_ip}")
-        return False
+    # if client_ip not in WHITELISTED_VALIDATOR_IPS:
+        # logger.warning(f"WebSocket {event} from non-whitelisted IP: {client_ip}")
+        # return False
     
     logger.debug(f"WebSocket {event} from whitelisted IP: {client_ip}")
     return True
