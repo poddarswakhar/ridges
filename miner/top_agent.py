@@ -5967,8 +5967,10 @@ class EnhancedToolManager(ToolManager):
         return summarization
 
 
+# this is sending the test file path, to find the readme
 def find_readme(file_path: str, repo_path: str) -> Optional[str]:
     """Find README file by traversing up from the given path."""
+    # SP This logic can be improved for accuracy, maybe
     current_dir = os.path.dirname(file_path)
 
     while True:
@@ -6083,12 +6085,14 @@ def check_task_type(input_dict: Dict[str, Any], repod_dir: str = 'repo'):
 
     for root, _, files in os.walk(repod_dir):
         for file in files:
+            # SP potential bug 1, astropy ends with _test
             if 'test_' in file and file.endswith('.py'):
                 test_files.append(os.path.join(root, file))
 
     test_files.sort(key=len)
 
     for path in test_files:
+        # SP why we toss out the test cases if its less than 5, change and monitor the eval
         if count_test_cases(path) > 5:
             test_file_path = path
             break
@@ -6098,10 +6102,11 @@ def check_task_type(input_dict: Dict[str, Any], repod_dir: str = 'repo'):
         return "pytest_not_available"
 
     print(f"test_file_path: {test_file_path}")
+    # test file path contains something like the whole path of repo/test_zzz.py
     readme_file_path = find_readme(test_file_path, repod_dir)
     if readme_file_path:
         print(f"README found: {readme_file_path}")
-        test_runner = find_test_runner(readme_file_path)
+        test_runner = find_test_runner(readme_file_path) # finding test runner from read me? WHYYY? we already have the test file path
         last_test_runner = test_runner
         test_runner_mode = get_test_runner_mode(test_runner)
     else:
@@ -6117,6 +6122,7 @@ def check_task_type(input_dict: Dict[str, Any], repod_dir: str = 'repo'):
         if test_runner == 'pytest':
             file_paths_str = ", ".join([f"'{f}'" for f in file_paths])
             command = PYTEST_COMMAND_TEMPLATE.format(file_paths=file_paths_str)
+            # why we are runing the tests first?
             result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=90)
             output = (result.stdout or "") + (result.stderr or "")
             print(f"--- output ---: {output}")
@@ -6128,7 +6134,7 @@ def check_task_type(input_dict: Dict[str, Any], repod_dir: str = 'repo'):
 
             if len(session_starts) > 1:
                 return "pytest_not_available"
-        else:
+        else: # what happens if there are more modes
             if test_runner_mode == "MODULE":
                 _file_paths = [filepath_to_module(f, repod_dir, test_runner) for f in file_paths]
             else:
@@ -6174,7 +6180,14 @@ def check_task_type(input_dict: Dict[str, Any], repod_dir: str = 'repo'):
         print("pytest is not working")
         return "pytest_not_available"
 
-
+# SP Second
+# sandbox_input = SandboxInput(
+#     instance_id=self.problem.instance_id,
+#     problem_statement=self.problem.problem_statement,
+#     repo=self.problem.repo,
+#     base_commit=self.problem.base_commit,
+#     run_id=self.evaluation_run.run_id,
+# )
 def process_task(input_dict: Dict[str, Any], repod_dir: str = 'repo'):
     global test_runner, test_runner_mode, run_id, problem_statement
     run_id = input_dict.get("run_id", "")
@@ -6200,6 +6213,7 @@ def process_task(input_dict: Dict[str, Any], repod_dir: str = 'repo'):
             logger.error(f"Attempt {attempt + 1} failed: {str(e)}")
             if attempt == max_retries - 1:
                 # Last attempt, don't retry
+                # SP why make it more efficient in range function
                 break
             continue
 
@@ -6327,7 +6341,14 @@ def has_dependency_error_task_process(input_dict: Dict[str, Any], repod_dir: str
 
 REPO_DIR = "repo"
 
-
+# SP Entry
+# sandbox_input = SandboxInput(
+#     instance_id=self.problem.instance_id,
+#     problem_statement=self.problem.problem_statement,
+#     repo=self.problem.repo,
+#     base_commit=self.problem.base_commit,
+#     run_id=self.evaluation_run.run_id,
+# )
 def agent_main(input_dict: Dict[str, Any], repo_dir: str = "repo", test_mode: bool = False):
     """Legacy interface wrapper for backwards compatibility."""
     global DEFAULT_PROXY_URL, REPO_DIR
@@ -7150,6 +7171,7 @@ def execute_test_patch_find_workflow_v1(problem_statement: str, *, timeout: int,
     while current_retries < max_retries:
         current_retries += 1
         # Build tool manager and prompts
+        # SP make tools LLM Powered  & optimized
         tool_manager = EnhancedToolManager(available_tools=[
             "search_in_all_files_content_v2",
             "analyze_dependencies",
@@ -7266,6 +7288,7 @@ def execute_fix_workflow_v1(problem_statement: str, *, timeout: int, run_id_1: s
 
 
 def extract_keywords(problem_text: str) -> str:
+    # SP Improvments use LLM for extract keywords
     """Extract keywords, prioritizing tokens that start with non-ASCII characters."""
     quoted = re.findall(r'"[^"\n]*"|\'[^\'\n]*\'', problem_text)
     module_paths = re.findall(r'\b(?:\w+\.){2,}\w+\b', problem_text)
@@ -7295,7 +7318,7 @@ def multi_task_process(input_dict: Dict[str, Any], repod_dir: str = 'repo'):
     if not problem_text:
         raise ValueError("input_dict must contain 'problem_statement'.")
     if hints:
-        logger.info(f"Found hints in problem statement: {hints}")
+        logger.info(f"Found hints in problem statement: {hints}") #good debug
 
     timeout = int(os.getenv("AGENT_TIMEOUT", str(DEFAULT_TIMEOUT)))
 
@@ -7310,7 +7333,7 @@ def multi_task_process(input_dict: Dict[str, Any], repod_dir: str = 'repo'):
     # Preprocessing step: search in all files
     tool_manager = EnhancedToolManager()
     search_command = f"grep --include='*.py' -rnE '{extract_keywords(problem_text)}' ."
-    try:
+    try: #SP WTF this TRY does???
         search_results = tool_manager.get_tool("search_in_all_files_content_v2")(
             grep_search_command=search_command
         )
