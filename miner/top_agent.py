@@ -6086,14 +6086,14 @@ def check_task_type(input_dict: Dict[str, Any], repod_dir: str = 'repo'):
     for root, _, files in os.walk(repod_dir):
         for file in files:
             # SP potential bug 1, astropy ends with _test
-            if 'test_' in file and file.endswith('.py'):
+            if (('test_' in file) or ('_test' in file)) and file.endswith('.py'):
                 test_files.append(os.path.join(root, file))
 
     test_files.sort(key=len)
 
     for path in test_files:
         # SP why we toss out the test cases if its less than 5, change and monitor the eval
-        if count_test_cases(path) > 5:
+        if count_test_cases(path) > 0:
             test_file_path = path
             break
 
