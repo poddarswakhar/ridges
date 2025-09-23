@@ -26,12 +26,12 @@ async def verify_request_ip_whitelist(
         # Empty whitelist = allow all IPs (warning logged at startup)
         return True
     
-    # if client_ip not in WHITELISTED_VALIDATOR_IPS:
-        # logger.warning(f"Request from non-whitelisted IP: {client_ip}. Whitelisted IPs: {WHITELISTED_VALIDATOR_IPS}")
-        # raise HTTPException(
-            # status_code=403,
-            # detail="Access denied: IP not whitelisted"
-        # )
+    if client_ip not in WHITELISTED_VALIDATOR_IPS:
+        logger.warning(f"Request from non-whitelisted IP: {client_ip}. Whitelisted IPs: {WHITELISTED_VALIDATOR_IPS}")
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied: IP not whitelisted"
+        )
     
     logger.debug(f"Request from whitelisted IP: {client_ip}")
     return True

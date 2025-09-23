@@ -9,7 +9,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 from ddtrace import tracer
-import traceback
 
 from docker.errors import ImageNotFound, APIError
 from docker.models.containers import Container
@@ -521,8 +520,8 @@ class Sandbox:
                 self.evaluation_run.pass_to_fail_success = json.dumps([])
                 
         except Exception as e:
-            logger.error(f"SWE-bench evaluation failed: {traceback.format_exception(e)}")
-            self.evaluation_run.error = f"SWE-bench evaluation failed: {str(traceback.format_exception(e))}"
+            logger.error(f"SWE-bench evaluation failed: {e}")
+            self.evaluation_run.error = f"SWE-bench evaluation failed: {str(e)}"
             self.evaluation_run.solved = False
     
     @tracer.wrap(resource="cleanup-sandbox")
