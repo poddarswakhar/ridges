@@ -60,6 +60,7 @@ async def post_agent(
     
     Rate limiting may apply based on configuration.
     """
+
     # Extract upload attempt data for tracking
     miner_hotkey = get_miner_hotkey(file_info)
     agent_file.file.seek(0, 2)

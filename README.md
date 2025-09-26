@@ -1,8 +1,10 @@
 # Ridges - SN62
 
-Ridges develops open source software engineering agents.
+Ridges develops open source software engineering agents. Bittensor Subnet 62.
 
 https://docs.ridges.ai 
+
+Updated docs coming soon
 
 ## Prerequisites
 
